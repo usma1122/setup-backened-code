@@ -4,8 +4,8 @@
 
 
 //1. fist Approach and basic approach 
- /* function dbConnect(){
-       simple Approach to connect a database 
+/* function dbConnect(){
+      simple Approach to connect a database 
 }
 dbConnect()  */
 
@@ -30,12 +30,42 @@ dbConnect()  */
 })()   */
 
 
-// 2. Approch 
+// 2. Approch  for db connect another file to clean purpose
 import dotenv from "dotenv"
 import { connectDB } from "./db/index.js"
+import { app } from "./app.js"
 
 dotenv.config({
-    path : "./env"
+    path: "./env"
 })
 
-connectDB ()
+const port = process.env.PORT || 8000
+// database Successfull connection handle with .then and .catch 
+connectDB()
+   .then(()=>{
+      app.on("error" ,(err)=>{
+        console.log(err);
+      app.listen(port ,()=>{
+        console.log(`Server iS Running At ${port}`);  
+      })
+      })
+   })
+   .catch((err)=>{
+     console.log(`DB Connection is Failed : ${err}`);
+   })
+// database Successfull connection handle with asynch and await
+const serverConnect = async () => {
+    try {
+        await connectDB()
+        app.on('error', (err) => {
+            console.log(`App is connect with DB ${err}`);
+            app.listen(port, () => {
+                console.log(`App is listening on port ${port}`);
+            })
+        })
+    } catch (error) {
+        console.log("MongoDB Connectiion failed : ", error);
+
+    }
+}
+serverConnect()
