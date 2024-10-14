@@ -42,30 +42,33 @@ dotenv.config({
 const port = process.env.PORT || 8000
 // database Successfull connection handle with .then and .catch 
 connectDB()
-   .then(()=>{
-      app.on("error" ,(err)=>{
-        console.log(err);
-      app.listen(port ,()=>{
-        console.log(`Server iS Running At ${port}`);  
-      })
-      })
-   })
-   .catch((err)=>{
-     console.log(`DB Connection is Failed : ${err}`);
-   })
-// database Successfull connection handle with asynch and await
-const serverConnect = async () => {
-    try {
-        await connectDB()
-        app.on('error', (err) => {
-            console.log(`App is connect with DB ${err}`);
-            app.listen(port, () => {
-                console.log(`App is listening on port ${port}`);
-            })
-        })
-    } catch (error) {
-        console.log("MongoDB Connectiion failed : ", error);
+    .then(() => {
+        app.listen(port, () => {
+            console.log(`Server is Running at port ${port}`);
+        });
 
-    }
-}
-serverConnect()
+        app.on('error', (err) => {
+            console.error('Server Error:', err);
+        });
+    })
+    .catch((err) => {
+        console.error(`DB Connection Failed: ${err}`);
+    });
+
+// database Successfull connection handle with asynch and await
+// const serverConnect = async () => {
+//     try {
+//         await connectDB()
+//         app.on('error', (err) => {
+//             console.log(`App is connect with DB ${err}`);
+//
+//         })
+//          app.listen(port, () => {
+//               console.log(`App is listening on port ${port}`);
+//             })
+//     } catch (error) {
+//         console.log("MongoDB Connectiion failed : ", error);
+
+//     }
+// }
+// serverConnect()
