@@ -10,3 +10,5 @@ class ApiResponse{
        this.Success = statusCode <400
     }
 }
+
+export {ApiResponse}
