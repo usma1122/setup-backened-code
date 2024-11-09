@@ -4,6 +4,7 @@ import { User } from "../models/User.models.js"
 import { uploadCloudinary } from "../utils/cloudinery.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
+import { response } from "express";
 
 // Acces and refresh token hum issy seperate method me dal dy gy 
 // The validateBeforeSave: false option in Mongoose tells Mongoose not to check if the data is valid before saving it to the database. By default, Mongoose will always check that data is correct (like required fields are filled out) when you save. 
@@ -29,7 +30,6 @@ const generateAccesAndRefreshTokens = async (userId) => {
       throw new ApiError(500, "Something Went Wrong While generating refesh and acces Token")
    }
 }
-
 
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -215,5 +215,65 @@ const refreshAccesToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, error?.message || "Invalid Refresh Token ")
    }
 })
-export { registerUser, loginUser, logoutUser , refreshAccesToken }
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+   const { oldPassword, newPassword } = req.body
+   const user = await User.findById(req.user?._id)
+   const isPasswordCorrect = user.isCorrectPassword(oldPassword)
+   if (!isPasswordCorrect) {
+      return new ApiResponse(400, "Invalid Old Password")
+   }
+   user.password = newPassword
+   await user.save({ validateBeforeSave: false })
+   return res
+      .status(200)
+      .json(new ApiResponse(201, {}, "Password Chnaged Successfully"))
+})
+const getCurrentUser = asyncHandler(async ()=>{
+    return res
+    .status(200)
+    .json( new ApiResponse (200 , req.user , "Current userFetched Successflluy "))
+})
+const updateAccountDetails = asyncHandler(async(req, res)=>{
+    const {fullname , email} = req.body
+    if (!fullname || !email) {
+      throw new ApiError (400 , "All feild are Required")
+    }
+   const user = await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+         $set : {
+            fullname ,
+            email : email ,
+         }
+      }, 
+      {new : true}
+   )
+  const updatedUser = await User.findById(user._id).select("-password")
+  return res
+  .status(200)
+  .json(new ApiResponse(200 , updatedUser , "AccountDetails Updated Succesfully "))
+})
+const updateUserAvatar = asyncHandler(async(req , res)=>{
+  const avatarLocalPath = req.file?.path
+  if (!avatarLocalPath) {
+     throw new ApiError(400 , "Avatar File is Missing")
+  }
+  const avatar = await uploadCloudinary(avatarLocalPath)
+  if (!avatar) {
+    return new ApiError(404 , "Error While Uploading on Avatar")
+   }
+     const user = await User.findByIdAndUpdate(
+      req.user?._id ,
+      {
+         $set : {
+            avatar : avatar.url
+         }
+      }, {new : true}
+     ).select("-password")
+     return res
+     .status(200)
+     .json(new ApiResponse(200 , user , " cover image Updaet Succeefullyy"))
+})
+
+export { registerUser, loginUser, logoutUser, refreshAccesToken , getCurrentUser , updateAccountDetails , updateUserAvatar}
 

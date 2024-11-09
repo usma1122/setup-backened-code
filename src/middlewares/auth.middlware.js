@@ -14,7 +14,6 @@ export const verifyJwt = asyncHandler(async (req , _, next )=>{
     }
     const decodedToken = await jsonwebtoken.verify(token , process.env.ACCESS_TOKEN_SECRET)
   
-    //    await User.findOne({ _id: decodedToken._id });
  
    const user =  await User.findById(
      decodedToken._id
